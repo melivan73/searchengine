@@ -12,12 +12,13 @@ import searchengine.dto.statistics.TotalStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final Random random = new Random();
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
     private final SitesList sites;
 
     @Override
