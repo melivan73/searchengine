@@ -1503,15 +1503,18 @@ var API = function(){
             address: '/indexPage',
             type: 'POST',
             action: function(result, $this){
-                if (result.result){
+                if (result.result) {
                     if ($this.next('.API-error').length) {
                         $this.next('.API-error').remove();
                     }
+                    $this.after('<div class="API-success">Страница добавлена/обновлена успешно</div>');
+/*
                     if ($this.next('.API-success').length) {
                         $this.next('.API-success').text('Страница добавлена/обновлена успешно');
                     } else {
                         $this.after('<div class="API-success">Страница поставлена в очередь на обновление / добавление</div>');
                     }
+*/
                 } else {
                     if ($this.next('.API-success').length) {
                         $this.next('.API-success').remove();
@@ -1526,7 +1529,7 @@ var API = function(){
         },
         search: {
             address: '/search',
-            type: 'get',
+            type: 'GET',
             action: function(result, $this, data){
                 if (result.result){
                     if ($this.next('.API-error').length) {
@@ -1755,7 +1758,9 @@ var API = function(){
                                 data = {
                                     query: $this.find('[name="query"]').val(),
                                     offset: 0,
-                                    limit: $this.data('sendlimit')
+                                    limit: $this.data('sendlimit'),
+                                    //добавлено melivan73
+                                    site: $this.find('[name="site"]').val()
                                 };
                                 if ( $this.find('[name="site"]').val() ) {
                                     data.site = $this.find('[name="site"]').val();
