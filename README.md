@@ -1,8 +1,8 @@
-<h1> CrawlerBot - SearchEngine </h1>
+<h3> CrawlerBot - SearchEngine </h3>
 
 Поисковый сервис на Java/Spring Boot: индексация HTML-страниц, лемматизация (ru), ранжирование результатов, генерация сниппетов.
 
-<h2> Ключевые возможности </h2>
+<h4> Ключевые возможности </h4>
 
 Полнотекстовая индексация страниц сайта(ов)
 Нормализация слов до лемм (ru/en)
@@ -11,7 +11,7 @@
 Поиск по всему набору сайтов или по конкретному сайту
 Переиндексация отдельной страницы.
 
-<h2> Стек </h2>
+<h4> Стек </h4>
     
 Java 17+, Spring Boot 3, Spring Data JPA, Hibernate
 MySQL 8.x
@@ -19,18 +19,18 @@ Jsoup (парсинг HTML)
 Lucene morphology (лемматизация ru/en)
 Сборка Maven.
 
-<h2> быстрый старт </h2>
+<h4> быстрый старт </h4>
 
-<h3> Зависимости <h3>
+<h5> Зависимости <h5>
     
 JDK 17+, MySQL 8.x
 
-<h3> Сборка и запуск </h3>
+<h5> Сборка и запуск </h5>
 
 mvn clean package
 java -jar target/SearchEngine-1.0-SNAPSHOT.jar
 
-<h3> Конфигурация </h3>
+<h5> Конфигурация </h5>
 
 ```yaml
 server:
@@ -74,8 +74,7 @@ indexing-settings:
         referrer: "http://www.google.com/"
 ```
 
-<h3> Внешние настройки MySQL и InnoDB </h3>
+<h5> Внешние настройки MySQL и InnoDB </h5>
 
-transaction_isolation=READ-COMMITTED
-innodb_autoinc_lock_mode=1
-
+transaction_isolation=READ-COMMITTED </br>
+innodb_autoinc_lock_mode=1 или =2
