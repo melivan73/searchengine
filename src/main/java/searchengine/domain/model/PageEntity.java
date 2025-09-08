@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "page")
+@Table(name = "page", indexes = {
+    @Index(name = "idx_site_path", columnList = "site_id, path", unique = true)
+})
 @Getter
 @Setter
 public class PageEntity {

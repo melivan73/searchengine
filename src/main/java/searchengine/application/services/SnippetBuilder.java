@@ -18,13 +18,12 @@ public final class SnippetBuilder {
         int width() {return Math.max(0, to - from);}
     }
 
-
-    public static String buildSnippetSimple(String text,
-                                            List<WordInfo> words,
-                                            Set<String> queryLemmas,
-                                            int ctx,
-                                            int distThreshold,
-                                            int maxFragments) {
+    public static String buildSnippet(String text,
+                                      List<WordInfo> words,
+                                      Set<String> queryLemmas,
+                                      int ctx,
+                                      int distThreshold,
+                                      int maxFragments) {
         Map<String, List<WordInfo>> byLemma = new HashMap<>();
         for (WordInfo w : words) {
             String lm = w.getLemma();
@@ -70,7 +69,8 @@ public final class SnippetBuilder {
         if (candidates.isEmpty()) {
             String core = cores.get(0);
             Span s2 = bestCluster(byLemma.get(core), 2);
-            if (s2 == null) {
+
+            if (s2 == null || s2.width() > distThreshold) {
                 s2 = bestCluster(byLemma.get(core), 1);
             }
             if (s2 != null) {

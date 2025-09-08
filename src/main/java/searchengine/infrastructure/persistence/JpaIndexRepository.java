@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.domain.model.LemmaEntity;
 import searchengine.domain.model.PageEntity;
+import searchengine.domain.model.SiteEntity;
 import searchengine.domain.repository.IndexRepository;
 
 import java.sql.SQLException;
@@ -25,6 +26,32 @@ import java.util.Map;
 public class JpaIndexRepository implements IndexRepository {
     private final SpringDataIndexRepository jpa;
     private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<LemmaEntity> getLemmasByPage(PageEntity page) {
+        return jpa.getLemmasByPage(page);
+    }
+
+    public void deleteByPage(PageEntity page) {
+        jpa.deleteByPage(page);
+    }
+
+    @Override
+    public long countPagesByLemmaInAndSiteIn(
+        List<String> lemmas,
+        int lemmasCount,
+        List<SiteEntity> sites) {
+        return jpa.countPagesByLemmasInSitesIn(lemmas, lemmasCount, sites);
+    }
+
+    @Override
+    public Page<Tuple> findPagesWithAbsRelevanceAndSiteIn(
+        List<String> lemmas,
+        int lemmasCount,
+        List<SiteEntity> sites,
+        Pageable pageable) {
+        return jpa.findPagesWithAbsRelevanceAndSiteIn(lemmas, lemmasCount, sites, pageable);
+    }
 
     @Override
     public Page<Tuple> findPagesWithAbsRelevance(List<LemmaEntity> lemmas,

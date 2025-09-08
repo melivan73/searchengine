@@ -12,6 +12,8 @@ import searchengine.web.dto.SearchResponse;
 import searchengine.web.dto.StatisticsResponse;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,13 +35,16 @@ public class ApiController {
     }
 
     @GetMapping("/api/startIndexing")
-    public ResponseEntity<Map<String, Object>> start() {
-        boolean result = startIndexing.execute();
-        String error = result ? "" : ErrorMessage.INDEXING_STARTED.getErrorMessage();
+    public ResponseEntity<Map<String, Object>> start() throws ExecutionException,
+        InterruptedException {
+
+
+        Future<Boolean> result = startIndexing.executeAsync();
+        //String error = result.get() ? "" : ErrorMessage.INDEXING_STARTED.getErrorMessage();
 
         return ResponseEntity.ok(Map.of(
-            "result", error.isEmpty(),
-            "error", error
+            "result", true,
+            "error", ""
         ));
     }
 

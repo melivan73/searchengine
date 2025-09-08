@@ -10,6 +10,9 @@ import searchengine.domain.model.SiteEntity;
 import searchengine.domain.repository.PageRepository;
 import searchengine.domain.repository.SiteRepository;
 
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Slf4j
@@ -21,7 +24,8 @@ public class IndexPageUseCase {
     private final PageIndexService pageIndexService;
 
     public boolean execute(String pageUrl) {
-        SiteEntity siteEntity = siteRepository.findByUrlMatching(pageUrl);
+        URI uri = URI.create(URLDecoder.decode(pageUrl, StandardCharsets.UTF_8));
+        SiteEntity siteEntity = siteRepository.findByUrlMatching(uri.getHost());
         if (siteEntity == null) {
             return false;
         }

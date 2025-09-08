@@ -27,7 +27,6 @@ spring:
 
 indexing-settings:
     sites:
-        # Формат https://site/
         -   url: https://playback.ru/
             name: Интернет-магазин электроники PlayBack
         -   url: https://nikoartgallery.com/

@@ -2,6 +2,7 @@ package searchengine.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.application.crawler.CrawlerSiteTask;
 import searchengine.application.crawler.SiteCrawler;
@@ -16,6 +17,8 @@ import searchengine.domain.repository.SiteRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,10 +32,14 @@ public class StartIndexingUseCase {
     private final IndexingManager indexingManager;
     private final SiteCrawler crawler;
 
-    public boolean execute() {
-        if (siteRepository.existsByStatus(SiteStatus.INDEXING)) {
-            return false;
-        }
+    @Async
+    public Future<Boolean> executeAsync() {
+        execute();
+        return CompletableFuture.completedFuture(
+            siteRepository.existsByStatus(SiteStatus.INDEXING));
+    }
+
+    public void execute() {
         clearDatabase();
         indexingManager.reset();
         List<CrawlerSiteTask> siteTasks = new ArrayList<>();
@@ -52,7 +59,6 @@ public class StartIndexingUseCase {
         indexingManager.awaitTermination();
         siteRepository.updateStatusWhereIn(Set.of(SiteStatus.INDEXING), SiteStatus.INDEXED);
         log.info("Обход всех сайтов завершен!");
-        return true;
     }
 
     @Transactional

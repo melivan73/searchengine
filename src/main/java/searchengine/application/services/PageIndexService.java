@@ -1,6 +1,7 @@
 package searchengine.application.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PageIndexService {
@@ -48,6 +50,8 @@ public class PageIndexService {
             site.setLastError(ErrorMessage.SITE_UNAVAILABLE.getErrorMessage());
             return null;
         }
+
+        deletePageIfExist(uri.getPath(), site);
 
         PageEntity pageEntity = new PageEntity();
         pageEntity.setSite(site);
@@ -74,5 +78,17 @@ public class PageIndexService {
             }
         }
         return document;
+    }
+
+    @Transactional
+    private void deletePageIfExist(String path, SiteEntity site) {
+        PageEntity page = pageRepository.exists(path, site);
+        if (page != null) {
+            List<LemmaEntity> lemmas = indexRepository.getLemmasByPage(page);
+            indexRepository.deleteByPage(page);
+            lemmaRepository.deleteByLemmasIn(lemmas);
+            pageRepository.delete(page);
+            log.info("Страница id = {}, path = {} удалена!", page.getId(), page.getPath());
+        }
     }
 }

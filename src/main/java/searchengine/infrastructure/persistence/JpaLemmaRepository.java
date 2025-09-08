@@ -3,7 +3,6 @@ package searchengine.infrastructure.persistence;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
@@ -23,7 +22,12 @@ import java.util.List;
 public class JpaLemmaRepository implements LemmaRepository {
     private final SpringDataLemmaRepository jpa;
     private final JdbcTemplate jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedJdbcTemplate;
+
+    @Override
+    public void deleteByLemmasIn(List<LemmaEntity> lemmas) {
+        jpa.decrementFrequency(lemmas);
+        jpa.deleteEmptyLemmas();
+    }
 
     @Override
     public int countBySite(SiteEntity siteEntity) {
@@ -32,7 +36,7 @@ public class JpaLemmaRepository implements LemmaRepository {
 
     @Override
     public List<LemmaEntity> findByLemmaInAndSiteIn(List<String> lemmas,
-        List<SiteEntity> siteEntities) {
+                                                    List<SiteEntity> siteEntities) {
         return jpa.findByLemmaInAndSiteIn(lemmas, siteEntities);
     }
 

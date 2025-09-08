@@ -6,10 +6,12 @@ import searchengine.domain.model.SiteEntity;
 import java.util.List;
 
 public interface LemmaRepository {
+    void deleteByLemmasIn(List<LemmaEntity> lemmas);
+
     int countBySite(SiteEntity siteEntity);
 
     List<LemmaEntity> findByLemmaInAndSiteIn(List<String> lemmas,
-        List<SiteEntity> siteEntities);
+                                             List<SiteEntity> siteEntities);
 
     List<LemmaEntity> findByLemmaInAndSite(List<String> lemmas, SiteEntity siteEntity);
 
