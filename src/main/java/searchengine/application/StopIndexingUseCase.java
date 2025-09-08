@@ -1,6 +1,7 @@
 package searchengine.application;
 
 import lombok.RequiredArgsConstructor;
+import searchengine.application.services.ErrorMessage;
 import searchengine.domain.model.SiteStatus;
 import searchengine.domain.repository.SiteRepository;
 
@@ -17,7 +18,10 @@ public class StopIndexingUseCase {
         }
 
         indexingManager.stop();
+        siteRepository.updateErrMessage(Set.of(SiteStatus.INDEXING),
+            ErrorMessage.INDEXING_STOP_BY_USER);
         siteRepository.updateStatusWhereIn(Set.of(SiteStatus.INDEXING), SiteStatus.FAILED);
+
         return true;
     }
 }
