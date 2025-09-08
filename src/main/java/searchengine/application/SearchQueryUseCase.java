@@ -40,7 +40,7 @@ public class SearchQueryUseCase {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     SearchResponse resp = new SearchResponse();
-    
+
     public SearchResponse execute(String query, String siteUrl, int offset, int limit) {
         List<SearchResult> resultList = new LinkedList<>();
         List<SiteEntity> sitesToSearch = new ArrayList<>();
@@ -66,7 +66,6 @@ public class SearchQueryUseCase {
             if (searchLemmas.isEmpty()) {
                 return SearchResponse.empty();
             }
-            // проверка на условие в ТЗ, исключение слишком частых лемма (объясните зачем)
             List<LemmaEntity> lemmaEntities = lemmaRepository.findByLemmaInAndSiteIn(
                 searchLemmas, sitesToSearch);
             searchLemmas = lemmaEntities
@@ -83,26 +82,11 @@ public class SearchQueryUseCase {
             Page<Tuple> p = indexRepository.findPagesWithAbsRelevanceAndSiteIn(searchLemmas,
                 searchLemmas.size(), sitesToSearch, pr);
 
-            long maxAbs = 0;
             for (Tuple t : p.getContent()) {
                 PageEntity pageEntity = t.get("page", PageEntity.class);
                 long absRel = t.get("absRel", Long.class);
-                maxAbs = Math.max(maxAbs, absRel);
-                double relRel = (double) Math.round(100 * absRel / (double) maxAbs) / 100;
 
-                Document document = Jsoup.parse(pageEntity.getContent());
-                SearchResult searchResult = new SearchResult();
-                searchResult.setSite(pageEntity.getSite().getUrl());
-                searchResult.setSiteName(pageEntity.getSite().getName());
-                searchResult.setUri(pageEntity.getPath());
-                if (searchResult.getSite().endsWith("/") && searchResult.getUri().startsWith(
-                    "/")) {
-                    searchResult.setUri(searchResult.getUri().substring(1));
-                }
-                searchResult.setTitle(document.title());
-                document.getElementsByTag("head").remove();
-                searchResult.setSnippet(createSnippet(document.text(), searchLemmas));
-                searchResult.setRelevance(relRel);
+                SearchResult searchResult = formResult(pageEntity, absRel, searchLemmas);
                 resultList.add(searchResult);
             }
         }
@@ -111,17 +95,39 @@ public class SearchQueryUseCase {
         return resp;
     }
 
-    private String createSnippet(String text, List<String> queryLemmas) {
+    private SearchResult formResult(PageEntity pageEntity, long absRel,
+                                    List<String> searchLemmas) {
+        long maxAbs = 0;
+        maxAbs = Math.max(maxAbs, absRel);
+        double relRel = (double) Math.round(100 * absRel / (double) maxAbs) / 100;
+
+        Document document = Jsoup.parse(pageEntity.getContent());
+        SearchResult searchResult = new SearchResult();
+        searchResult.setSite(pageEntity.getSite().getUrl());
+        searchResult.setSiteName(pageEntity.getSite().getName());
+        searchResult.setUri(pageEntity.getPath());
+        if (searchResult.getSite().endsWith("/") && searchResult.getUri().startsWith(
+            "/")) {
+            searchResult.setUri(searchResult.getUri().substring(1));
+        }
+        searchResult.setTitle(document.title());
+        document.getElementsByTag("head").remove();
+        searchResult.setSnippet(createSnippet(document.text(), searchLemmas));
+        searchResult.setRelevance(relRel);
+        return searchResult;
+    }
+
+    private String createSnippet(String text, List<String> searchLemmas) {
         PageLemmaProcessor pageLemmaProcessor = new PageLemmaProcessor(text,
             PageLanguage.RUSSIAN, TextAnalyzeMode.LEMMA_WORD_AND_WORDPOS);
         if (pageLemmaProcessor.process()) {
             text = pageLemmaProcessor.getProcessedText();
 
-            Set<String> queryLemmasSet = new HashSet<String>(queryLemmas);
+            Set<String> queryLemmasSet = new HashSet<>(searchLemmas);
             return SnippetBuilder.buildSnippet(text, pageLemmaProcessor.getWordInfoList(),
                 queryLemmasSet, SNIPPET_CONTEXT_CHARS_COUNT, SNIPPET_LEMMAS_DISTANCE_THRESHOLD,
                 SNIPPET_MAX_FRAGMENTS);
         }
-        return text.substring(Math.min(350, text.length()));
+        return text.substring(100, Math.min(300, text.length()));
     }
 }
