@@ -18,12 +18,18 @@ public interface SpringDataSiteRepository extends JpaRepository<SiteEntity, Inte
 
     @Modifying
     @Transactional
-    @Query(
-        "UPDATE SiteEntity s SET s.status = :toStatus, s.statusTime = :time " +
-        "WHERE s.status IN :from")
+    @Query("UPDATE SiteEntity s SET s.status = :toStatus, s.statusTime = :time " +
+           "WHERE s.status IN :from")
     void updateStatuses(@Param("from") Set<SiteStatus> from,
-        @Param("toStatus") SiteStatus to,
-        @Param("time") LocalDateTime time);
+                        @Param("toStatus") SiteStatus to,
+                        @Param("time") LocalDateTime time);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE SiteEntity s SET s.lastError = :err WHERE s.status IN :statuses")
+    void updateErrMessage(@Param("statuses") Set<SiteStatus> statuses,
+                          @Param("err") String err);
+
 
     @Transactional(readOnly = true)
     @Query("SELECT s FROM SiteEntity s WHERE s.url LIKE CONCAT('%', :pageUrl, '%')")

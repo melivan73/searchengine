@@ -1,8 +1,8 @@
 package searchengine.infrastructure.persistence;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import searchengine.application.services.ErrorMessage;
 import searchengine.domain.model.SiteEntity;
 import searchengine.domain.model.SiteStatus;
 import searchengine.domain.repository.SiteRepository;
@@ -22,9 +22,13 @@ public class JpaSiteRepository implements SiteRepository {
     }
 
     @Override
-    @Transactional
     public void updateStatusWhereIn(Set<SiteStatus> fromStatuses, SiteStatus toStatus) {
         jpa.updateStatuses(fromStatuses, toStatus, LocalDateTime.now());
+    }
+
+    @Override
+    public void updateErrMessage(Set<SiteStatus> statuses, ErrorMessage err) {
+        jpa.updateErrMessage(statuses, err.getErrorMessage());
     }
 
     @Override
