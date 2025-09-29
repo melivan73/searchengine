@@ -4,7 +4,7 @@ import searchengine.domain.model.PageEntity;
 import searchengine.domain.model.SiteEntity;
 
 public interface PageRepository {
-    PageEntity exists(String path, SiteEntity site);
+    PageEntity exists(String path, long siteId);
 
     void delete(PageEntity page);
 
@@ -13,4 +13,6 @@ public interface PageRepository {
     void deleteAll();
 
     PageEntity save(PageEntity pageEntity);
+
+    void flush();
 }

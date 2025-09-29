@@ -16,16 +16,16 @@ public interface SpringDataSiteRepository extends JpaRepository<SiteEntity, Inte
 
     boolean existsByStatus(SiteStatus status);
 
-    @Modifying
     @Transactional
+    @Modifying
     @Query("UPDATE SiteEntity s SET s.status = :toStatus, s.statusTime = :time " +
            "WHERE s.status IN :from")
     void updateStatuses(@Param("from") Set<SiteStatus> from,
                         @Param("toStatus") SiteStatus to,
                         @Param("time") LocalDateTime time);
 
-    @Modifying
     @Transactional
+    @Modifying
     @Query("UPDATE SiteEntity s SET s.lastError = :err WHERE s.status IN :statuses")
     void updateErrMessage(@Param("statuses") Set<SiteStatus> statuses,
                           @Param("err") String err);

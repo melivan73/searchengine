@@ -11,13 +11,14 @@ import searchengine.domain.model.SiteEntity;
 import java.util.List;
 
 public interface SpringDataLemmaRepository extends JpaRepository<LemmaEntity, Integer> {
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Modifying
     @Query("UPDATE LemmaEntity l SET l.frequency = l.frequency - 1 WHERE " +
            "l IN :lemmas AND l.frequency > 0")
     void decrementFrequency(@Param("lemmas") List<LemmaEntity> lemmas);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Modifying
     @Query("DELETE FROM LemmaEntity l WHERE l.frequency <= 0")
     void deleteEmptyLemmas();
 

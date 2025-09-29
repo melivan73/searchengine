@@ -18,10 +18,11 @@ import java.util.regex.Pattern;
 @Getter
 public final class PageLemmaProcessor {
     public static final int MINIMAL_TEXT_SIE = 3;
-    public static final String RU_WORDS_REGEXP =
+    public static final String WORDS_REGEXP =
         "\\b[\\p{IsAlphabetic}][\\p{IsAlphabetic}-]*[\\p{IsAlphabetic}]?\\b";
+    public static final String EN_WORD_REGEXP =
+        "\\b[a-zA-Z]{2,}\\b";
     private final String text;
-    private final PageLanguage lang;
     private final Map<String, Integer> lemmas = new HashMap<>();
     private final List<WordInfo> wordInfoList = new ArrayList<>();
     private final TextAnalyzeMode mode;
@@ -34,24 +35,31 @@ public final class PageLemmaProcessor {
         }
         processedText = text;
 
-        LuceneMorphology luceneMorphology;
+        EnglishLuceneMorphology enMorphology;
+        RussianLuceneMorphology ruMorphology;
         try {
-            luceneMorphology = switch (lang) {
-                case RUSSIAN -> new RussianLuceneMorphology();
-                case ENGLISH -> new EnglishLuceneMorphology();
-            };
+            enMorphology = new EnglishLuceneMorphology();
+            ruMorphology = new RussianLuceneMorphology();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        Pattern wordPattern = Pattern.compile(RU_WORDS_REGEXP,
+        Pattern wordPattern = Pattern.compile(WORDS_REGEXP,
             Pattern.UNICODE_CHARACTER_CLASS);
         Matcher matcher = wordPattern.matcher(processedText);
-        WordInfo wordInfo = null;
 
-        Set<String> illegalTags = IllegalPartsOfSpeech.getIllegalTags(lang);
+        LuceneMorphology wordMorphology;
+        Set<String> illegalTags;
+        WordInfo wordInfo = null;
         while (matcher.find()) {
             String word = matcher.group().toLowerCase().strip();
+            if (word.matches(EN_WORD_REGEXP)) {
+                wordMorphology = enMorphology;
+                illegalTags = IllegalPartsOfSpeech.getIllegalTags(PageLanguage.ENGLISH);
+            } else {
+                wordMorphology = ruMorphology;
+                illegalTags = IllegalPartsOfSpeech.getIllegalTags(PageLanguage.RUSSIAN);
+            }
             if (mode == TextAnalyzeMode.LEMMA_WORD_AND_WORDPOS) {
                 wordInfo = new WordInfo();
                 wordInfo.setOriginalWord(word);
@@ -61,14 +69,15 @@ public final class PageLemmaProcessor {
                 wordInfo.setEndPos(matcher.end());
                 wordInfoList.add(wordInfo);
             }
-            if (!luceneMorphology.checkString(word)) {
+            if (!wordMorphology.checkString(word)) {
                 continue;
             }
-            List<String> baseForms = luceneMorphology.getNormalForms(word);
+            List<String> baseForms = wordMorphology.getNormalForms(word);
+            Set<String> finalIllegalTags = illegalTags;
             for (String baseForm : baseForms) {
-                List<String> morphInfos = luceneMorphology.getMorphInfo(baseForm);
+                List<String> morphInfos = wordMorphology.getMorphInfo(baseForm);
                 boolean isIllegal = morphInfos.stream().anyMatch(
-                    info -> illegalTags.stream().anyMatch(info::contains));
+                    info -> finalIllegalTags.stream().anyMatch(info::contains));
                 if (!isIllegal) {
                     if (mode == TextAnalyzeMode.LEMMA_WORD_AND_WORDPOS) {
                         wordInfo.setLemma(baseForm);
