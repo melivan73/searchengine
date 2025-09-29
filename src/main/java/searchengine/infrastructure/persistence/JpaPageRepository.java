@@ -12,8 +12,8 @@ public class JpaPageRepository implements PageRepository {
     private final SpringDataPageRepository jpa;
 
     @Override
-    public PageEntity exists(String path, SiteEntity site) {
-        return jpa.findByPathAndSite(path, site);
+    public PageEntity exists(String path, long siteId) {
+        return jpa.findByPathAndSiteId(path, siteId);
     }
 
     @Override
@@ -34,5 +34,10 @@ public class JpaPageRepository implements PageRepository {
     @Override
     public PageEntity save(PageEntity pageEntity) {
         return jpa.save(pageEntity);
+    }
+
+    @Override
+    public void flush() {
+        jpa.flush();
     }
 }

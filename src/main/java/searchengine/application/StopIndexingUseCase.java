@@ -2,6 +2,7 @@ package searchengine.application;
 
 import lombok.RequiredArgsConstructor;
 import searchengine.application.services.ErrorMessage;
+import searchengine.application.services.IndexingManager;
 import searchengine.domain.model.SiteStatus;
 import searchengine.domain.repository.SiteRepository;
 

@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import searchengine.application.services.PageLanguage;
 import searchengine.application.services.PageLemmaProcessor;
 import searchengine.application.services.SnippetBuilder;
 import searchengine.application.services.TextAnalyzeMode;
@@ -56,9 +55,8 @@ public class SearchQueryUseCase {
         if (sitesToSearch.isEmpty()) {
             return SearchResponse.empty();
         }
-        PageLanguage lang = PageLanguage.RUSSIAN;
 
-        PageLemmaProcessor queryProcessor = new PageLemmaProcessor(query, lang,
+        PageLemmaProcessor queryProcessor = new PageLemmaProcessor(query,
             TextAnalyzeMode.LEMMA_AND_FREQUENCY);
         if (queryProcessor.process()) {
             List<String> searchLemmas =
@@ -119,7 +117,7 @@ public class SearchQueryUseCase {
 
     private String createSnippet(String text, List<String> searchLemmas) {
         PageLemmaProcessor pageLemmaProcessor = new PageLemmaProcessor(text,
-            PageLanguage.RUSSIAN, TextAnalyzeMode.LEMMA_WORD_AND_WORDPOS);
+            TextAnalyzeMode.LEMMA_WORD_AND_WORDPOS);
         if (pageLemmaProcessor.process()) {
             text = pageLemmaProcessor.getProcessedText();
 

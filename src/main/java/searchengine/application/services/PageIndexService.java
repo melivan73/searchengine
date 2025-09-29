@@ -1,5 +1,6 @@
 package searchengine.application.services;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -33,6 +34,7 @@ public class PageIndexService {
     private final PageRepository pageRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
+    private final EntityManager entityManager;
 
     @Transactional
     public Document indexPage(HtmlPage htmlPage) {
@@ -51,7 +53,14 @@ public class PageIndexService {
             return null;
         }
 
-        deletePageIfExist(uri.getPath(), site);
+        PageEntity page = pageRepository.exists(uri.getPath(), site.getId());
+        if (page != null) {
+            List<LemmaEntity> lemmas = indexRepository.getLemmasByPage(page);
+            indexRepository.deleteByPage(page);
+            lemmaRepository.deleteByLemmasIn(lemmas);
+            pageRepository.delete(page);
+            log.info("Страница id = {}, path = {} удалена!", page.getId(), page.getPath());
+        }
 
         PageEntity pageEntity = new PageEntity();
         pageEntity.setSite(site);
@@ -62,9 +71,8 @@ public class PageIndexService {
 
         Document document = Jsoup.parse(pageEntity.getContent(), htmlPage.getUrl());
 
-        PageLanguage lang = PageLanguage.RUSSIAN;
         PageLemmaProcessor lemmaProcessor = new PageLemmaProcessor(pageEntity.getContent(),
-            lang, TextAnalyzeMode.LEMMA_AND_FREQUENCY);
+            TextAnalyzeMode.LEMMA_AND_FREQUENCY);
 
         if (lemmaProcessor.process()) {
             Map<String, Integer> lemmas = lemmaProcessor.getLemmas();
@@ -78,17 +86,5 @@ public class PageIndexService {
             }
         }
         return document;
-    }
-
-    @Transactional
-    private void deletePageIfExist(String path, SiteEntity site) {
-        PageEntity page = pageRepository.exists(path, site);
-        if (page != null) {
-            List<LemmaEntity> lemmas = indexRepository.getLemmasByPage(page);
-            indexRepository.deleteByPage(page);
-            lemmaRepository.deleteByLemmasIn(lemmas);
-            pageRepository.delete(page);
-            log.info("Страница id = {}, path = {} удалена!", page.getId(), page.getPath());
-        }
     }
 }

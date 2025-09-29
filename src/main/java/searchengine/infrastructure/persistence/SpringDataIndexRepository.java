@@ -25,6 +25,7 @@ public interface SpringDataIndexRepository extends JpaRepository<IndexEntity, In
     @Query("DELETE FROM IndexEntity i WHERE i.page = :page")
     void deleteByPage(@Param("page") PageEntity page);
 
+    @Transactional(readOnly = true)
     @Query("""
              SELECT COUNT(p)
              FROM PageEntity p

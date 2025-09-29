@@ -1,4 +1,4 @@
-package searchengine.application;
+package searchengine.application.services;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IndexingManager {
     private final ObjectProvider<CrawlerSiteTask> taskProvider;
     @Getter
-    private final Set<ForkJoinPool> pools = ConcurrentHashMap.newKeySet();
+    private Set<ForkJoinPool> pools = ConcurrentHashMap.newKeySet();
     @Getter
     private final AtomicInteger indexedCount = new AtomicInteger(0);
     private final AtomicBoolean stopped = new AtomicBoolean(false);
@@ -43,6 +43,8 @@ public class IndexingManager {
     public void reset() {
         stopped.set(false);
         indexedCount.set(0);
+        pools.forEach(ForkJoinPool::shutdownNow);
+        pools = ConcurrentHashMap.newKeySet();
     }
 
     public boolean isStopped() {

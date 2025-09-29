@@ -16,11 +16,11 @@ public class IndexEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "page_id", nullable = false,
         foreignKey = @ForeignKey(name = "fk_index_page"))
     private PageEntity page;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "lemma_id", nullable = false,
         foreignKey = @ForeignKey(name = "fk_index_lemma"))
     private LemmaEntity lemma;

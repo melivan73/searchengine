@@ -3,7 +3,7 @@ package searchengine.application.crawler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import searchengine.application.IndexingManager;
+import searchengine.application.services.IndexingManager;
 import searchengine.config.ConfigSite;
 import searchengine.domain.model.SiteEntity;
 import searchengine.domain.model.SiteStatus;

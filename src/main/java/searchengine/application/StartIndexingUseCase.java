@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.application.crawler.CrawlerSiteTask;
 import searchengine.application.crawler.SiteCrawler;
+import searchengine.application.services.IndexingManager;
 import searchengine.config.ConfigSite;
 import searchengine.config.IndexingSettingsProvider;
 import searchengine.domain.model.SiteStatus;
